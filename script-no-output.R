@@ -493,13 +493,20 @@ summary(lm7)
 ## Because these F-tests have to be calculated manually, it is best to use
 ## a convenience function provided by one of the authors.
 ## This will only work if the library 'pascal' has been loaded.
-## aov.ftest(lm7,
-##          list(ed ~ com, dh ~ com, sm ~ com, div ~ com,
-##               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-##               light:sp ~ light:com:sp, # see text !
-##               div:sp ~ com:sp,
-##               light:sp:div ~ light:sp:com),
-##          table=TRUE)
+aov.ftest(lm7,
+         list(block ~ plot, light ~ light:com,
+              ed ~ com, dh ~ com, sm ~ com, div ~ com,
+              sp ~ com:sp,
+              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+              light:sp ~ light:com:sp, # see text !
+              div:sp ~ com:sp,
+              light:sp:div ~ light:sp:com,
+              com ~ light:com,
+              light:com ~ plot,
+              plot ~ Residuals,
+              com:sp ~ light:com:sp,
+              light:com:sp ~ Residuals),
+          table=TRUE)
 
 lm8 <- aov(terms(height ~ block
                  + light
@@ -512,7 +519,7 @@ lm8 <- aov(terms(height ~ block
                  + div:sp
                  + light:sp
                  + light:div:sp
-                 + com           # approx. error term for div, ed, dh, sm
+                 + com           # approx. error term for ed, dh, sm, div
                  + light:com     # approx. error term for light:div ... light:sm
                  + plot          # approx. error term for block, light:com
                  + com:sp        # approx. error term for div:sp
@@ -522,13 +529,20 @@ lm8 <- aov(terms(height ~ block
 summary(lm8)
 
 ## Tests using manual method outlined above for lm7:
-## aov.ftest(lm8,
-##          list(ed ~ com, dh ~ com, sm ~ com, div ~ com,
-##               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-##               light:sp ~ light:com:sp, # see text !
-##               div:sp ~ com:sp,
-##               light:sp:div ~ light:sp:com),
-##          table=TRUE)
+aov.ftest(lm8,
+         list(block ~ plot, light ~ light:com,
+              ed ~ com, dh ~ com, sm ~ com, div ~ com,
+              sp ~ com:sp,
+              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+              light:sp ~ light:com:sp, # see text !
+              div:sp ~ com:sp,
+              light:sp:div ~ light:sp:com,
+              com ~ light:com,
+              light:com ~ plot,
+              plot ~ Residuals,
+              com:sp ~ light:com:sp,
+              light:com:sp ~ Residuals),
+          table=TRUE)
 
 ## Inspect the effect of div after adjusting for dominant species:
 m <- aov(height ~ block + light + ed + dh + sm + div,

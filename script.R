@@ -675,26 +675,41 @@ summary(lm7)
 ## Because these F-tests have to be calculated manually, it is best to use
 ## a convenience function provided by one of the authors.
 ## This will only work if the library 'pascal' has been loaded.
-## aov.ftest(lm7,
-##          list(ed ~ com, dh ~ com, sm ~ com, div ~ com,
-##               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-##               light:sp ~ light:com:sp, # see text !
-##               div:sp ~ com:sp,
-##               light:sp:div ~ light:sp:com),
-##          table=TRUE)
-#|             nom          den df ddf         SS         MS      F     P   s
-#| 1            ed          com  1  24  739383.41  739383.41 355.32 0.001 ***
-#| 2            dh          com  1  24  136627.78  136627.78  65.66 0.001 ***
-#| 3            sm          com  1  24 1223734.32 1223734.32 588.08 0.001 ***
-#| 4           div          com  1  24  254803.79  254803.79 122.45 0.001 ***
-#| 5      light:ed    light:com  1  24   12230.08   12230.08   7.90 0.010  **
-#| 6      light:dh    light:com  1  24     312.37     312.37   0.20 0.658    
-#| 7      light:sm    light:com  1  24   12553.87   12553.87   8.11 0.009  **
-#| 8     light:div    light:com  1  24    1438.46    1438.46   0.93 0.345    
-#| 9      light:sp light:com:sp 11   9  123386.37   11216.94   8.14 0.002  **
-#| 10       div:sp       com:sp 11   9   39979.78    3634.53   1.08 0.461    
-#| 11 light:sp:div light:sp:com 11   9   21638.11    1967.10   1.43 0.302    
-
+aov.ftest(lm7,
+         list(block ~ plot, light ~ light:com,
+              ed ~ com, dh ~ com, sm ~ com, div ~ com,
+              sp ~ com:sp,
+              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+              light:sp ~ light:com:sp, # see text !
+              div:sp ~ com:sp,
+              light:sp:div ~ light:sp:com,
+              com ~ light:com,
+              light:com ~ plot,
+              plot ~ Residuals,
+              com:sp ~ light:com:sp,
+              light:com:sp ~ Residuals),
+          table=TRUE)
+#|             nom          den  df  ddf         SS         MS      F     P   s
+#| 1         block         plot   3  188    5922.24    1974.08   0.97 0.406    
+#| 2         light    light:com   1   24   26102.78   26102.78  16.87 0.001 ***
+#| 3            ed          com   1   24  739383.41  739383.41 355.32 0.001 ***
+#| 4            dh          com   1   24  136627.78  136627.78  65.66 0.001 ***
+#| 5            sm          com   1   24 1223734.32 1223734.32 588.08 0.001 ***
+#| 6           div          com   1   24  254803.79  254803.79 122.45 0.001 ***
+#| 7            sp       com:sp  11    9 3164058.89  287641.72  85.59 0.001 ***
+#| 8      light:ed    light:com   1   24   12230.08   12230.08   7.90 0.010  **
+#| 9      light:dh    light:com   1   24     312.37     312.37   0.20 0.658    
+#| 10     light:sm    light:com   1   24   12553.87   12553.87   8.11 0.009  **
+#| 11    light:div    light:com   1   24    1438.46    1438.46   0.93 0.345    
+#| 12     light:sp light:com:sp  11    9  123386.37   11216.94   8.14 0.002  **
+#| 13       div:sp       com:sp  11    9   39979.78    3634.53   1.08 0.461    
+#| 14 light:sp:div light:sp:com  11    9   21638.11    1967.10   1.43 0.302    
+#| 15          com    light:com  24   24   49941.52    2080.90   1.34 0.237    
+#| 16    light:com         plot  24  188   37142.88    1547.62   0.76 0.779    
+#| 17         plot    Residuals 188 2777  380816.15    2025.62   3.38 0.001 ***
+#| 18       com:sp light:com:sp   9    9   30246.10    3360.68   2.44 0.101    
+#| 19 light:com:sp    Residuals   9 2777   12404.47    1378.27   2.30 0.015   *
+    
 lm8 <- aov(terms(height ~ block
                  + light
                  + div
@@ -706,7 +721,7 @@ lm8 <- aov(terms(height ~ block
                  + div:sp
                  + light:sp
                  + light:div:sp
-                 + com           # approx. error term for div, ed, dh, sm
+                 + com           # approx. error term for ed, dh, sm, div
                  + light:com     # approx. error term for light:div ... light:sm
                  + plot          # approx. error term for block, light:com
                  + com:sp        # approx. error term for div:sp
@@ -738,25 +753,40 @@ summary(lm8)
 #| 1024 observations deleted due to missingness
 
 ## Tests using manual method outlined above for lm7:
-## aov.ftest(lm8,
-##          list(ed ~ com, dh ~ com, sm ~ com, div ~ com,
-##               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-##               light:sp ~ light:com:sp, # see text !
-##               div:sp ~ com:sp,
-##               light:sp:div ~ light:sp:com),
-##          table=TRUE)
-#|             nom          den df ddf         SS         MS      F     P   s
-#| 1            ed          com  1  24  738340.34  738340.34 354.82 0.001 ***
-#| 2            dh          com  1  24  156311.51  156311.51  75.12 0.001 ***
-#| 3            sm          com  1  24 1454090.24 1454090.24 698.78 0.001 ***
-#| 4           div          com  1  24    5807.20    5807.20   2.79 0.108    
-#| 5      light:ed    light:com  1  24    9706.03    9706.03   6.27 0.020   *
-#| 6      light:dh    light:com  1  24    1085.91    1085.91   0.70 0.411    
-#| 7      light:sm    light:com  1  24    9193.76    9193.76   5.94 0.023   *
-#| 8     light:div    light:com  1  24    6549.09    6549.09   4.23 0.051   .
-#| 9      light:sp light:com:sp 11   9  123386.37   11216.94   8.14 0.002  **
-#| 10       div:sp       com:sp 11   9   39979.78    3634.53   1.08 0.461    
-#| 11 light:sp:div light:sp:com 11   9   21638.11    1967.10   1.43 0.302    
+aov.ftest(lm8,
+         list(block ~ plot, light ~ light:com,
+              ed ~ com, dh ~ com, sm ~ com, div ~ com,
+              sp ~ com:sp,
+              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+              light:sp ~ light:com:sp, # see text !
+              div:sp ~ com:sp,
+              light:sp:div ~ light:sp:com,
+              com ~ light:com,
+              light:com ~ plot,
+              plot ~ Residuals,
+              com:sp ~ light:com:sp,
+              light:com:sp ~ Residuals),
+          table=TRUE)
+#|             nom          den  df  ddf         SS         MS      F     P   s
+#| 1         block         plot   3  188    5922.24    1974.08   0.97 0.406    
+#| 2         light    light:com   1   24   26102.78   26102.78  16.87 0.001 ***
+#| 3            ed          com   1   24  738340.34  738340.34 354.82 0.001 ***
+#| 4            dh          com   1   24  156311.51  156311.51  75.12 0.001 ***
+#| 5            sm          com   1   24 1454090.24 1454090.24 698.78 0.001 ***
+#| 6           div          com   1   24    5807.20    5807.20   2.79 0.108    
+#| 7            sp       com:sp  11    9 3164058.89  287641.72  85.59 0.001 ***
+#| 8      light:ed    light:com   1   24    9706.03    9706.03   6.27 0.020   *
+#| 9      light:dh    light:com   1   24    1085.91    1085.91   0.70 0.411    
+#| 10     light:sm    light:com   1   24    9193.76    9193.76   5.94 0.023   *
+#| 11    light:div    light:com   1   24    6549.09    6549.09   4.23 0.051   .
+#| 12     light:sp light:com:sp  11    9  123386.37   11216.94   8.14 0.002  **
+#| 13       div:sp       com:sp  11    9   39979.78    3634.53   1.08 0.461    
+#| 14 light:sp:div light:sp:com  11    9   21638.11    1967.10   1.43 0.302    
+#| 15          com    light:com  24   24   49941.52    2080.90   1.34 0.237    
+#| 16    light:com         plot  24  188   37142.88    1547.62   0.76 0.779    
+#| 17         plot    Residuals 188 2777  380816.15    2025.62   3.38 0.001 ***
+#| 18       com:sp light:com:sp   9    9   30246.10    3360.68   2.44 0.101    
+#| 19 light:com:sp    Residuals   9 2777   12404.47    1378.27   2.30 0.015   *
 
 ## Inspect the effect of div after adjusting for dominant species:
 m <- aov(height ~ block + light + ed + dh + sm + div,
