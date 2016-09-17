@@ -1,2 +1,6 @@
-# jpe
-data and R scripts for article published in Journal of Plant Ecology
+### jpe
+
+Online material for article in Journal of Plant Ecology
+
+This material is currently 'private' for the authors to share...
+
