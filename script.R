@@ -55,13 +55,14 @@ rm(list=ls())                         # clear workspace
 asr <- require(pascal) &              # load ASReml, if installed, plus convenience functions
        require(asreml)                # if both libraries were loaded, asr == TRUE
 
-for(d in c("derived_data","figures")) # create directories if these don't exist
+for(d in c("figures"))                # create directory if it does not exist
     if(!dir.exists(d))                # data will be stored there
         dir.create(d)
     
 ######################################################################
 ###
-### Prepare all files used in this script:
+### Based on a single original file, the following derived data files
+### were prepared:
 ###
 ### pilot_bd_all_pools.csv
 ###    original file with basal diameter and height of trees
