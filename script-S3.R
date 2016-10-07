@@ -10,6 +10,7 @@
 ### - 30-05-2016 version for final test
 ### - 07-06-2016 minor corrections
 ### - 15-06-2016 script separated from main script
+### - 07-10-2016 grand_mean replaced by intercept for clarity
 
 ######################################################################
 ###
@@ -99,7 +100,7 @@ model {
     sd_LxC <- 1/sqrt(tau_LxC)
 
     ## ----- Create new names for (derived) parameter:
-    grand_mean <- beta_0
+    intercept  <- beta_0
     shade_eff  <- beta_L[2] 
     div_2      <- beta_D[2]
     div_4      <- beta_D[3]
@@ -161,7 +162,7 @@ m11<-jags.model('m11.bug',
 update(m11,n.iter=100000)
 
 ## Extract data from chain by more sampling:
-par.vec <- c("grand_mean","shade_eff","div_2","div_4","VC_C","VC_LxC","VC_P")
+par.vec <- c("intercept","shade_eff","div_2","div_4","VC_C","VC_LxC","VC_P")
 m11.res <- jags.samples(m11,
                         par.vec,
                         n.iter=100000)
@@ -179,7 +180,7 @@ for(par in par.vec) {
 
 m11.tab
 #|                mean       CI.L    CI.U
-#| grand_mean  19.2702   9.124948  29.464
+#| intercept   19.2702   9.124948  29.464
 #| shade_eff  -11.3604 -14.184333  -8.536
 #| div_2        1.3661 -11.756926  14.425
 #| div_4        0.6403 -22.284567  23.394
@@ -203,7 +204,7 @@ coef(m11)
 #| $div_4
 #| [1] -8.786
 #| 
-#| $grand_mean
+#| $intercept
 #| [1] 24.86
 #| 
 #| $mu_C
@@ -242,7 +243,7 @@ coef(m11)
 
 ## Calculate residual standard deviation. We use pnorm to get the quantiles
 ## that correspond to minus and plus 1 s.d.:
-m11.limits <- unname(quantile(m11.res$grand_mean, pnorm(c(-1,1))))
+m11.limits <- unname(quantile(m11.res$intercept, pnorm(c(-1,1))))
 (m11.limits[2] - m11.limits[1]) / 2
 #| [1] 4.739
 
