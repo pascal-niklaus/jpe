@@ -9,6 +9,7 @@
 ### - 30-05-2016 version for final test
 ### - 07-06-2016 minor corrections
 ### - 16-09-2016 final revision
+### - 31-10-2017 comment added with respect to mm6
 
 ######################################################################
 ###
@@ -21,12 +22,17 @@
 ### Depending on your software environment you may want to set the
 ### working directory using 'setwd("/path/to/your/directory")'.
 ###
+### We provide two versions of this script:
 ###
-### We provide two versions of this script. This version contains the
-### code with important output inserted as comment. The output often
-### is abbreviated shortened to save space. Output is marked by lines
-### beginning with '#|'. This version of the script will allow studying
-### code and results without a computer at hand.
+### script-no-output.R:
+###   contains the code only
+###
+### script.R:
+###   containts code amended with important output that is inserted
+###   as comment lines that begin with '#|'. The output often is
+###   abbreviated to save space. The purpouse of this file is to
+###   provide an opportunity to study the code and output without
+###   a computer at hand.
 
 ######################################################################
 ###
@@ -55,10 +61,11 @@ rm(list=ls())                         # clear workspace
 asr <- require(pascal) &              # load ASReml, if installed, plus convenience functions
        require(asreml)                # if both libraries were loaded, asr == TRUE
 
-for(d in c("figures"))                # create directory if it does not exist
+for(d in c("derived_data","figures")) # create directories if these don't exist
     if(!dir.exists(d))                # data will be stored there
         dir.create(d)
     
+
 ######################################################################
 ###
 ### Based on a single original file, the following derived data files
@@ -337,18 +344,16 @@ summary(lm4)
 #| light:com    8    117      15    0.90  0.5261    
 #| Residuals   63   1029      16                    
 
-## If you installed library 'pascal', you can compute the F-tests as
-## follows:
-## aov.ftest(lm4,
-##           list(block ~ Residuals,
-##                light ~ light:com,
-##                ed ~ com,
-##                div ~ com,
-##                com ~ light:com,
-##                light:ed ~ light:com,
-##                light:div ~ light:com,
-##                light:com ~ Residuals),
-##           table=TRUE)
+aov.ftest(lm4,
+          list(block ~ Residuals,
+               light ~ light:com,
+               ed ~ com,
+               div ~ com,
+               com ~ light:com,
+               light:ed ~ light:com,
+               light:div ~ light:com,
+               light:com ~ Residuals),
+          table=TRUE)
 #|         nom       den df ddf      SS      MS      F     P   s
 #| 1     block Residuals  3  63  209.66   69.89   4.28 0.009  **
 #| 2     light light:com  1   8 2823.64 2823.64 193.12 0.001 ***
@@ -500,6 +505,18 @@ summary(mm5)   # this again will take a few minutes
 ######################################################################
 ###
 ### Model mm6 (Table 5a,b)
+###
+### Important note: For continuous random effects, both a random
+### intercept and a random slope are determined. While the slope does
+### not depend on the chosen origin of the scale used for the
+### continous random effect, the intercept does. Hence, all tests of
+### fixed effects that refer to this random intercept will depend
+### on the choice of origin made. 
+### In mm6 for example, tests of contrasts within com (e.g. div)
+### refer to time = 0 (this is the time the random intercept refers to).
+### In other words, shifting the origin of our time measurement
+### will change significances in the ANOVA table for terms that 
+### are related to this random intercept.
 
 ## (This will take a few minutes):
 mm6 <- lmer(height ~ block
@@ -543,14 +560,14 @@ anova(mm6,type=1,ddf="Satterthwaite")
 #| block        19017    6339     3 228.7      14 1.3e-08 ***
 #| light         1060    1060     1  79.9       2   0.125    
 #| div            443     443     1  78.6       1   0.320    
-#| sp         1285714  116883    11  56.5     265 < 2e-16 ***
-#| time        732090  732090     1  72.0    1659 < 2e-16 ***
+#| sp         1285741  116886    11  56.5     265 < 2e-16 ***
+#| time        732099  732099     1  72.0    1659 < 2e-16 ***
 #| light:div      379     379     1 246.2       1   0.355    
-#| light:sp     93917    8538    11  70.7      19 < 2e-16 ***
-#| div:sp        9931     903    11 102.7       2   0.031 *  
-#| light:time   13739   13739     1  50.7      31 9.4e-07 ***
+#| light:sp     93919    8538    11  70.7      19 < 2e-16 ***
+#| div:sp        9932     903    11 102.7       2   0.031 *  
+#| light:time   13740   13740     1  50.7      31 9.4e-07 ***
 #| div:time         0       0     1  73.2       0   0.991    
-#| sp:time     476704   43337    11  47.8      98 < 2e-16 ***
+#| sp:time     476701   43336    11  47.8      98 < 2e-16 ***
 
 
 ## Fit the same model with ASReml, if available. In this model, we
@@ -620,7 +637,6 @@ if(asr) {
 #| ---- Dispersion:
 #| 21.01 
 
-
 ######################################################################
 ###
 ### Non-orthogonality:
@@ -677,18 +693,18 @@ summary(lm7)
 ## a convenience function provided by one of the authors.
 ## This will only work if the library 'pascal' has been loaded.
 aov.ftest(lm7,
-         list(block ~ plot, light ~ light:com,
-              ed ~ com, dh ~ com, sm ~ com, div ~ com,
-              sp ~ com:sp,
-              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-              light:sp ~ light:com:sp, # see text !
-              div:sp ~ com:sp,
-              light:sp:div ~ light:sp:com,
-              com ~ light:com,
-              light:com ~ plot,
-              plot ~ Residuals,
-              com:sp ~ light:com:sp,
-              light:com:sp ~ Residuals),
+          list(block ~ plot, light ~ light:com,
+               ed ~ com, dh ~ com, sm ~ com, div ~ com,
+               sp ~ com:sp,
+               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+               light:sp ~ light:com:sp, # see text !
+               div:sp ~ com:sp,
+               light:sp:div ~ light:sp:com,
+               com ~ light:com,
+               light:com ~ plot,
+               plot ~ Residuals,
+               com:sp ~ light:com:sp,
+               light:com:sp ~ Residuals),
           table=TRUE)
 #|             nom          den  df  ddf         SS         MS      F     P   s
 #| 1         block         plot   3  188    5922.24    1974.08   0.97 0.406    
@@ -710,7 +726,7 @@ aov.ftest(lm7,
 #| 17         plot    Residuals 188 2777  380816.15    2025.62   3.38 0.001 ***
 #| 18       com:sp light:com:sp   9    9   30246.10    3360.68   2.44 0.101    
 #| 19 light:com:sp    Residuals   9 2777   12404.47    1378.27   2.30 0.015   *
-    
+
 lm8 <- aov(terms(height ~ block
                  + light
                  + div
@@ -755,18 +771,18 @@ summary(lm8)
 
 ## Tests using manual method outlined above for lm7:
 aov.ftest(lm8,
-         list(block ~ plot, light ~ light:com,
-              ed ~ com, dh ~ com, sm ~ com, div ~ com,
-              sp ~ com:sp,
-              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-              light:sp ~ light:com:sp, # see text !
-              div:sp ~ com:sp,
-              light:sp:div ~ light:sp:com,
-              com ~ light:com,
-              light:com ~ plot,
-              plot ~ Residuals,
-              com:sp ~ light:com:sp,
-              light:com:sp ~ Residuals),
+          list(block ~ plot, light ~ light:com,
+               ed ~ com, dh ~ com, sm ~ com, div ~ com,
+               sp ~ com:sp,
+               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+               light:sp ~ light:com:sp, # see text !
+               div:sp ~ com:sp,
+               light:sp:div ~ light:sp:com,
+               com ~ light:com,
+               light:com ~ plot,
+               plot ~ Residuals,
+               com:sp ~ light:com:sp,
+               light:com:sp ~ Residuals),
           table=TRUE)
 #|             nom          den  df  ddf         SS         MS      F     P   s
 #| 1         block         plot   3  188    5922.24    1974.08   0.97 0.406    
@@ -848,6 +864,7 @@ summary.lm(m)
 #| F-statistic:  166 on 8 and 3079 DF,  p-value: <2e-16
 #| 
 #| ## The effect of div (slope) is -11.801 
+
 
 ###
 ### End of script.

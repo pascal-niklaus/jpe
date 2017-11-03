@@ -9,6 +9,7 @@
 ### - 30-05-2016 version for final test
 ### - 07-06-2016 minor corrections
 ### - 16-09-2016 final revision
+### - 31-10-2017 comment added with respect to mm6
 
 ######################################################################
 ###
@@ -21,9 +22,16 @@
 ### Depending on your software environment you may want to set the
 ### working directory using 'setwd("/path/to/your/directory")'.
 ###
-### We provide two versions of this script. This version provides
-### the code, with output only shown when it was obtained with non-
-### standard (commercial) software.
+### We provide two versions of this script:
+###
+### script-no-output.R:
+###   contains the code only
+###
+### script.R:
+###   containts code amended with important output that is inserted
+###   abbreviated to save space. The purpouse of this file is to
+###   provide an opportunity to study the code and output without
+###   a computer at hand.
 
 ######################################################################
 ###
@@ -56,9 +64,11 @@ for(d in c("derived_data","figures")) # create directories if these don't exist
     if(!dir.exists(d))                # data will be stored there
         dir.create(d)
     
+
 ######################################################################
 ###
-### Prepare all files used in this script:
+### Based on a single original file, the following derived data files
+### were prepared:
 ###
 ### pilot_bd_all_pools.csv
 ###    original file with basal diameter and height of trees
@@ -90,13 +100,6 @@ write.csv(d14X.plot,                          # save result for reference
           row.names=FALSE)
 
 ## Structure of data set in 'pilot_pool_X_plot_ba.csv':
-#|    block    plot         uind center pool com div fdiv light  ind sp time   bd height cg ch cl cm cs dh ed lg pm qs sm ss     ba
-#| 14    B1 B1.Xa01 B1.Xa01|i-01 buffer    X  ss   1   D1     c i-01 ss   14 15.0    104  0  0  0  0  0  0  0  0  0  0  0  1 1.7671
-#| 31    B1 B1.Xa01 B1.Xa01|i-02 buffer    X  ss   1   D1     c i-02 ss   14  9.0     74  0  0  0  0  0  0  0  0  0  0  0  1 0.6362
-#| 48    B1 B1.Xa01 B1.Xa01|i-03 buffer    X  ss   1   D1     c i-03 ss   14 11.0     76  0  0  0  0  0  0  0  0  0  0  0  1 0.9503
-#| 65    B1 B1.Xa01 B1.Xa01|i-04 buffer    X  ss   1   D1     c i-04 ss   14 12.5     85  0  0  0  0  0  0  0  0  0  0  0  1 1.2272
-#| 82    B1 B1.Xa01 B1.Xa01|i-05 buffer    X  ss   1   D1     c i-05 ss   14 11.5     91  0  0  0  0  0  0  0  0  0  0  0  1 1.0387
-#| 99    B1 B1.Xa01 B1.Xa01|i-06 center    X  ss   1   D1     c i-06 ss   14 10.5    101  0  0  0  0  0  0  0  0  0  0  0  1 0.8659
 
 
 ######################################################################
@@ -157,6 +160,7 @@ dev.off()
 lm1 <- aov(ba ~ light + fdiv,
            data = d14X.plot)
 summary(lm1)
+
 
 ######################################################################
 ###
@@ -241,6 +245,7 @@ summary(mm3)
 
 anova(mm3, type=1, ddf="Kenward-Roger")
 
+
 ######################################################################
 ###
 ### Models LM4 and MM4 (Table 4a,b; Fig. 4c)
@@ -257,18 +262,16 @@ lm4 <- aov(terms(ba ~ block
            data = d14X.plot)
 summary(lm4)
 
-## If you installed library 'pascal', you can compute the F-tests as
-## follows:
-## aov.ftest(lm4,
-##           list(block ~ Residuals,
-##                light ~ light:com,
-##                ed ~ com,
-##                div ~ com,
-##                com ~ light:com,
-##                light:ed ~ light:com,
-##                light:div ~ light:com,
-##                light:com ~ Residuals),
-##           table=TRUE)
+aov.ftest(lm4,
+          list(block ~ Residuals,
+               light ~ light:com,
+               ed ~ com,
+               div ~ com,
+               com ~ light:com,
+               light:ed ~ light:com,
+               light:div ~ light:com,
+               light:com ~ Residuals),
+          table=TRUE)
 
 lm4b <- aov(ba ~ block + light * (ed + div) + Error(com + com:light),
               data = d14X.plot)
@@ -299,18 +302,12 @@ d$ftime <- factor(sprintf("t-%02d",d$time))  # time as factor
 
 ## With lm/aov, the design matrix becomes too large (on most computers):
 m12.aov <- aov(height ~ uind*ftime,data=d)
-#| Error: cannot allocate vector of size 27.9 Gb
 
 ## On a computer with A LOT of memory, we get:
-#|                Df   Sum Sq Mean Sq 
-#| uind         4105 72049602   17552 
-#| ftime          16 19799497 1237469 
-#| uind:ftime  49462 14706122     297                     
 
 ## With lmer, specifying the full error model does not work because
 ## it does not leave a residual:
 m12 <- lmer(height ~ (1|uind) + (1|ftime) + (1|uind:ftime), data=d)
-#| Error: number of levels of each grouping factor must be < number of observations
 
 ## However, we can omit (1|uind:ftime), a term which corresponds to the
 ## residual in the model below:
@@ -367,6 +364,18 @@ summary(mm5)   # this again will take a few minutes
 ######################################################################
 ###
 ### Model mm6 (Table 5a,b)
+###
+### Important note: For continuous random effects, both a random
+### intercept and a random slope are determined. While the slope does
+### not depend on the chosen origin of the scale used for the
+### continous random effect, the intercept does. Hence, all tests of
+### fixed effects that refer to this random intercept will depend
+### on the choice of origin made. 
+### In mm6 for example, tests of contrasts within com (e.g. div)
+### refer to time = 0 (this is the time the random intercept refers to).
+### In other words, shifting the origin of our time measurement
+### will change significances in the ANOVA table for terms that 
+### are related to this random intercept.
 
 ## (This will take a few minutes):
 mm6 <- lmer(height ~ block
@@ -391,6 +400,7 @@ summary(mm6)
 ## demanding. In fact, we were not able to get ANOVA results with the KR-method
 ## for this model. Still, the following command will take a few minutes to run:
 anova(mm6,type=1,ddf="Satterthwaite") 
+
 
 ## Fit the same model with ASReml, if available. In this model, we
 ## allow for negative estimates of variance components. This is
@@ -417,48 +427,6 @@ if(asr) {
     
     test.asreml(mm6asr)
 }
-#| ---- Wald tests:
-#|             Df denDF F.inc      Pr    
-#| (Intercept)  1  17.0  7811 < 2e-16 ***
-#| block        3 192.6     2 0.10774    
-#| light        1  15.7    34 2.8e-05 ***
-#| div          1   9.4   100 2.5e-06 ***
-#| sp          11  30.6   330 < 2e-16 ***
-#| light:div    1   6.9     1 0.46263    
-#| light:sp    11  40.3     9 5.0e-08 ***
-#| div:sp      11  32.8     4 0.00079 ***
-#| time         1  18.0  4761 < 2e-16 ***
-#| light:time   1  32.4    24 2.9e-05 ***
-#| div:time     1   7.4     1 0.32499    
-#| sp:time     11  44.0   124 < 2e-16 ***
-#| 
-#| ---- Stratum variances:
-#|                       df Variance    com time:com com:light time:com:light       plot     com:sp time:com:sp light:com:sp R!variance
-#| com               19.975  1434.23 461.58   760.76 232.60693         380.38  59.208980 265.854050    276.5784   133.324103          1
-#| time:com          17.756  3827.40   0.00 55336.41  -0.94167       27657.14  -0.579519   0.818908  24517.9702     0.019734          1
-#| com:light         24.047  2178.64   0.00     0.00 178.27330        -159.60  44.715758  -0.074116      7.7433    99.160672          1
-#| time:com:light    33.464  5789.40   0.00     0.00   0.00000       13345.99   0.044988  -0.089690     13.7836    -1.390594          1
-#| plot             189.429 12635.53   0.00     0.00   0.00000           0.00 199.145517   1.162712    -29.5327     1.275979          1
-#| com:sp            14.725   992.98   0.00     0.00   0.00000           0.00   0.000000 217.410175   -193.3783   108.629180          1
-#| time:com:sp       29.003  4385.26   0.00     0.00   0.00000           0.00   0.000000   0.000000  19919.0054    -0.121424          1
-#| light:com:sp      22.061  7464.10   0.00     0.00   0.00000           0.00   0.000000   0.000000      0.0000   322.834717          1
-#| R!variance     53179.540   441.42   0.00     0.00   0.00000           0.00   0.000000   0.000000      0.0000     0.000000          1
-#| 
-#| ---- Variance components:
-#|                               gamma component std.error   z.ratio    constraint
-#| com!com.var              0.00313961   1.38589  2.974511   0.46592 Unconstrained
-#| time:com!time.var       -0.00051496  -0.22731  0.063268  -3.59289 Unconstrained
-#| com:light!com.var       -0.03930374 -17.34957  5.482804  -3.16436 Unconstrained
-#| time:com:light!time.var  0.00091187   0.40252  0.106054   3.79543 Unconstrained
-#| plot!plot.var            0.13857405  61.16976  6.519580   9.38247 Unconstrained
-#| com:sp!com.var          -0.01847604  -8.15575  3.864397  -2.11048 Unconstrained
-#| time:com:sp!time.var     0.00044883   0.19812  0.057814   3.42693 Unconstrained
-#| light:com:sp!light.var   0.04927928  21.75300  6.961295   3.12485 Unconstrained
-#| R!variance               1.00000000 441.42291  2.707058 163.06370      Positive
-#| 
-#| ---- Dispersion:
-#| 21.01 
-
 
 ######################################################################
 ###
@@ -494,18 +462,18 @@ summary(lm7)
 ## a convenience function provided by one of the authors.
 ## This will only work if the library 'pascal' has been loaded.
 aov.ftest(lm7,
-         list(block ~ plot, light ~ light:com,
-              ed ~ com, dh ~ com, sm ~ com, div ~ com,
-              sp ~ com:sp,
-              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-              light:sp ~ light:com:sp, # see text !
-              div:sp ~ com:sp,
-              light:sp:div ~ light:sp:com,
-              com ~ light:com,
-              light:com ~ plot,
-              plot ~ Residuals,
-              com:sp ~ light:com:sp,
-              light:com:sp ~ Residuals),
+          list(block ~ plot, light ~ light:com,
+               ed ~ com, dh ~ com, sm ~ com, div ~ com,
+               sp ~ com:sp,
+               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+               light:sp ~ light:com:sp, # see text !
+               div:sp ~ com:sp,
+               light:sp:div ~ light:sp:com,
+               com ~ light:com,
+               light:com ~ plot,
+               plot ~ Residuals,
+               com:sp ~ light:com:sp,
+               light:com:sp ~ Residuals),
           table=TRUE)
 
 lm8 <- aov(terms(height ~ block
@@ -530,29 +498,30 @@ summary(lm8)
 
 ## Tests using manual method outlined above for lm7:
 aov.ftest(lm8,
-         list(block ~ plot, light ~ light:com,
-              ed ~ com, dh ~ com, sm ~ com, div ~ com,
-              sp ~ com:sp,
-              light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
-              light:sp ~ light:com:sp, # see text !
-              div:sp ~ com:sp,
-              light:sp:div ~ light:sp:com,
-              com ~ light:com,
-              light:com ~ plot,
-              plot ~ Residuals,
-              com:sp ~ light:com:sp,
-              light:com:sp ~ Residuals),
+          list(block ~ plot, light ~ light:com,
+               ed ~ com, dh ~ com, sm ~ com, div ~ com,
+               sp ~ com:sp,
+               light:ed ~ light:com, light:dh ~ light:com, light:sm ~ light:com, light:div ~ light:com,
+               light:sp ~ light:com:sp, # see text !
+               div:sp ~ com:sp,
+               light:sp:div ~ light:sp:com,
+               com ~ light:com,
+               light:com ~ plot,
+               plot ~ Residuals,
+               com:sp ~ light:com:sp,
+               light:com:sp ~ Residuals),
           table=TRUE)
 
 ## Inspect the effect of div after adjusting for dominant species:
 m <- aov(height ~ block + light + ed + dh + sm + div,
            data = d14)
-summary.lm(m)   # The effect of div (slope) is -11.801
+summary.lm(m)
 
 ## Inspect the effect of div before adjusting for dominant species:
 m <- aov(height ~ block + light + div,
            data = d14)
-summary.lm(m)   # The effect of div (slope) is -11.801 
+summary.lm(m)
+
 
 ###
 ### End of script.
